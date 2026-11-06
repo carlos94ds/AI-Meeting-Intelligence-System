@@ -1,0 +1,17 @@
+{
+  "name": "ai-meeting-intelligence-system",
+  "private": true,
+  "description": "Van vergaderingen naar concrete resultaten – UI-prototype met mock-AI.",
+  "scripts": {
+    "setup": "npm install && npm --prefix frontend install && node scripts/setup-backend.mjs",
+    "dev": "concurrently -k -n api,web -c blue,magenta \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:backend": "node scripts/run-backend.mjs",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "seed": "node scripts/run-backend.mjs seed --reset",
+    "test": "node scripts/run-backend.mjs test",
+    "build": "npm --prefix frontend run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
