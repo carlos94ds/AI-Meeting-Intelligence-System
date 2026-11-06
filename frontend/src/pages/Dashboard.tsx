@@ -16,6 +16,7 @@ import {
 import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ButtonLink } from '@/components/ButtonLink'
+import { MeetingList } from '@/components/MeetingList'
 import { OwnerChip } from '@/components/OwnerChip'
 import { PageHeader } from '@/components/PageHeader'
 import { useProjectScope } from '@/components/project-scope'
@@ -24,7 +25,7 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDashboard, useSettings } from '@/hooks/queries'
-import { capitalize, formatDate, formatDuration, formatShortDate, formatWeekday, relativeDays } from '@/lib/format'
+import { capitalize, formatDate, formatShortDate, formatWeekday, relativeDays } from '@/lib/format'
 import type { ActionItem, Dashboard as DashboardData, MeetingSummary } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -189,7 +190,7 @@ function AttentionCard({ items }: { items: ActionItem[] }) {
           {items.map((item) => (
             <li key={item.id}>
               <Link
-                to={`/actiepunten?item=${item.id}`}
+                to={`?item=${item.id}`}
                 className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg px-2 py-3 outline-none hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <div className="min-w-0 flex-1 basis-64">
@@ -293,42 +294,7 @@ function RecentMeetings({ meetings }: { meetings: MeetingSummary[] }) {
           className="py-8"
         />
       ) : (
-        <ul className="-mx-2 divide-y">
-          {meetings.map((m) => (
-            <li key={m.id}>
-              <Link
-                to={`/vergaderingen/${m.id}`}
-                className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg px-2 py-3 outline-none hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <div className="min-w-0 flex-1 basis-56">
-                  <div className="truncate text-sm font-medium">{m.title}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {m.project_name} · {formatDate(m.date)} · {formatDuration(m.duration_minutes)}
-                  </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-2 text-xs">
-                  {m.processing_state !== 'done' ? (
-                    <span className="text-muted-foreground">Wordt verwerkt…</span>
-                  ) : (
-                    <>
-                      <span className="text-muted-foreground">{m.action_item_count} actiepunten</span>
-                      {m.pending_review_count > 0 && (
-                        <span className="rounded-full bg-accent px-2 py-0.5 font-medium text-accent-foreground">
-                          {m.pending_review_count} te reviewen
-                        </span>
-                      )}
-                      {m.pending_suggestion_count > 0 && (
-                        <span className="rounded-full bg-accent px-2 py-0.5 font-medium text-accent-foreground">
-                          {m.pending_suggestion_count} statusvoorstellen
-                        </span>
-                      )}
-                    </>
-                  )}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <MeetingList meetings={meetings} />
       )}
     </SectionCard>
   )

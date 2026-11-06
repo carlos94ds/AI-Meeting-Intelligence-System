@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom'
+import { ActionItemSheetHost } from '@/components/ActionItemSheet'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
 
@@ -18,6 +19,7 @@ export function AppLayout() {
           <Outlet />
         </main>
       </div>
+      <ActionItemSheetHost />
     </div>
   )
 }

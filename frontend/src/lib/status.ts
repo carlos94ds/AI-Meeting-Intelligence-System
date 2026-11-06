@@ -67,3 +67,23 @@ export const STATUS_META: Record<ActionStatus, StatusMeta> = {
 }
 
 export const ACTIVE_STATUSES: ActionStatus[] = ['open', 'uitgesteld', 'gemeld_afgerond']
+
+/** Spiegel van ALLOWED_TRANSITIONS in backend/app/status.py. */
+export const ALLOWED_TRANSITIONS: Record<ActionStatus, ActionStatus[]> = {
+  voorgesteld: ['open', 'vervallen'],
+  open: ['uitgesteld', 'gemeld_afgerond', 'afgerond', 'vervallen'],
+  uitgesteld: ['uitgesteld', 'open', 'gemeld_afgerond', 'afgerond', 'vervallen'],
+  gemeld_afgerond: ['open', 'uitgesteld', 'afgerond', 'vervallen'],
+  afgerond: ['open'],
+  vervallen: ['open'],
+}
+
+/**
+ * Statussen die via "Status wijzigen" gekozen mogen worden.
+ * "Gemeld als afgerond" → "Afgerond" kan alleen via Bevestigen of Bewijs toevoegen.
+ */
+export function manualTargets(current: ActionStatus): ActionStatus[] {
+  return ALLOWED_TRANSITIONS[current].filter(
+    (s) => !(current === 'gemeld_afgerond' && s === 'afgerond') && !(current === 'voorgesteld' && s === 'open'),
+  )
+}
