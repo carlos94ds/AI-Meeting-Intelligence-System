@@ -5,9 +5,10 @@ import { Dashboard } from '@/pages/Dashboard'
 import { MeetingDetail } from '@/pages/MeetingDetail'
 import { Meetings } from '@/pages/Meetings'
 import { NotFound } from '@/pages/NotFound'
-import { Placeholder } from '@/pages/Placeholder'
+import { NewMeeting } from '@/pages/NewMeeting'
 import { ProjectDetail } from '@/pages/ProjectDetail'
 import { Projects } from '@/pages/Projects'
+import { Settings } from '@/pages/Settings'
 
 export default function App() {
   return (
@@ -18,9 +19,9 @@ export default function App() {
         <Route path="projecten/:projectId" element={<ProjectDetail />} />
         <Route path="actiepunten" element={<ActionItems />} />
         <Route path="vergaderingen" element={<Meetings />} />
-        <Route path="vergaderingen/nieuw" element={<Placeholder title="Vergadering toevoegen" phase={4} />} />
+        <Route path="vergaderingen/nieuw" element={<NewMeeting />} />
         <Route path="vergaderingen/:meetingId" element={<MeetingDetail />} />
-        <Route path="instellingen" element={<Placeholder title="Instellingen" phase={4} />} />
+        <Route path="instellingen" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

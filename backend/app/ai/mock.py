@@ -200,14 +200,15 @@ def _rule_based_match(
                     confidence=0.9,
                 )
             )
-        elif update.kind == "bezig" and item.status != ActionStatus.OPEN:
+        elif update.kind == "bezig" and item.status == ActionStatus.GEMELD_AFGEROND:
+            # Eerder als klaar gemeld, maar nu toch nog bezig → terug naar Open. Uitstel blijft staan.
             suggestions.append(
                 StatusSuggestion(
                     action_item_id=item.id,
                     suggested_status=ActionStatus.OPEN,
                     quote=update.text,
                     segment_index=update.segment_index,
-                    rationale=f"{item.owner_name} is er nog mee bezig.",
+                    rationale=f"{item.owner_name} is er toch nog mee bezig; eerder gemeld als afgerond.",
                     confidence=0.7,
                 )
             )

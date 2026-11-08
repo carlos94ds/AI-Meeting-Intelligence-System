@@ -27,7 +27,7 @@ from .models import (
     SummaryKind,
     TranscriptSegment,
 )
-from .services import Lookup, build_project_state
+from .services import Lookup, build_project_state, get_app_settings
 
 log = logging.getLogger(__name__)
 
@@ -126,7 +126,10 @@ async def process_meeting(meeting_id: int, audio: bytes) -> None:
             names = [p.name for p in session.exec(
                 select(Participant).where(col(Participant.id).in_(participant_ids)).order_by(col(Participant.id))
             ).all()]
-            transcript = await provider.transcribe(audio, TranscriptionHints(participant_names=names))
+            language = get_app_settings(session).language
+            transcript = await provider.transcribe(audio, TranscriptionHints(participant_names=names, language=language))
+            # Prototype: audio wordt nooit op schijf bewaard; de bytes verdwijnen na deze stap.
+            del audio
             segment_ids: list[int] = []
             for pos, s in enumerate(transcript.segments):
                 row = TranscriptSegment(meeting_id=meeting_id, position=pos, speaker_label=s.speaker_label,
