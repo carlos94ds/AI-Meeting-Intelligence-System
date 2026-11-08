@@ -1,0 +1,19 @@
+{
+  "description": "Optionele context voor spraakherkenning (vgl. Whisper `initial_prompt`).",
+  "properties": {
+    "participant_names": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Participant Names",
+      "type": "array"
+    },
+    "language": {
+      "default": "nl",
+      "title": "Language",
+      "type": "string"
+    }
+  },
+  "title": "TranscriptionHints",
+  "type": "object"
+}

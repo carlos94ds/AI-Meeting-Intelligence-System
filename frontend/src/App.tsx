@@ -1,14 +1,16 @@
+import { lazy } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { ActionItems } from '@/pages/ActionItems'
-import { Dashboard } from '@/pages/Dashboard'
-import { MeetingDetail } from '@/pages/MeetingDetail'
-import { Meetings } from '@/pages/Meetings'
-import { NotFound } from '@/pages/NotFound'
-import { NewMeeting } from '@/pages/NewMeeting'
-import { ProjectDetail } from '@/pages/ProjectDetail'
-import { Projects } from '@/pages/Projects'
-import { Settings } from '@/pages/Settings'
+
+const ActionItems = lazy(() => import('@/pages/ActionItems').then((m) => ({ default: m.ActionItems })))
+const Dashboard = lazy(() => import('@/pages/Dashboard').then((m) => ({ default: m.Dashboard })))
+const MeetingDetail = lazy(() => import('@/pages/MeetingDetail').then((m) => ({ default: m.MeetingDetail })))
+const Meetings = lazy(() => import('@/pages/Meetings').then((m) => ({ default: m.Meetings })))
+const NewMeeting = lazy(() => import('@/pages/NewMeeting').then((m) => ({ default: m.NewMeeting })))
+const NotFound = lazy(() => import('@/pages/NotFound').then((m) => ({ default: m.NotFound })))
+const ProjectDetail = lazy(() => import('@/pages/ProjectDetail').then((m) => ({ default: m.ProjectDetail })))
+const Projects = lazy(() => import('@/pages/Projects').then((m) => ({ default: m.Projects })))
+const Settings = lazy(() => import('@/pages/Settings').then((m) => ({ default: m.Settings })))
 
 export default function App() {
   return (

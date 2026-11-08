@@ -1,0 +1,67 @@
+{
+  "$defs": {
+    "ActionStatus": {
+      "enum": [
+        "voorgesteld",
+        "open",
+        "uitgesteld",
+        "gemeld_afgerond",
+        "afgerond",
+        "vervallen"
+      ],
+      "title": "ActionStatus",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "action_item_id": {
+      "title": "Action Item Id",
+      "type": "integer"
+    },
+    "suggested_status": {
+      "$ref": "#/$defs/ActionStatus"
+    },
+    "quote": {
+      "title": "Quote",
+      "type": "string"
+    },
+    "segment_index": {
+      "minimum": 0,
+      "title": "Segment Index",
+      "type": "integer"
+    },
+    "rationale": {
+      "title": "Rationale",
+      "type": "string"
+    },
+    "new_deadline": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "New Deadline"
+    },
+    "confidence": {
+      "default": 0.8,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    }
+  },
+  "required": [
+    "action_item_id",
+    "suggested_status",
+    "quote",
+    "segment_index",
+    "rationale"
+  ],
+  "title": "StatusSuggestion",
+  "type": "object"
+}

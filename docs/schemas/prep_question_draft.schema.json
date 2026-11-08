@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "reason": {
+      "title": "Reason",
+      "type": "string"
+    },
+    "action_item_id": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Action Item Id"
+    },
+    "source_segment_id": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Segment Id"
+    },
+    "priority": {
+      "default": 3,
+      "description": "1 = hoogste prioriteit",
+      "maximum": 5,
+      "minimum": 1,
+      "title": "Priority",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "text",
+    "reason"
+  ],
+  "title": "PrepQuestionDraft",
+  "type": "object"
+}

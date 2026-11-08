@@ -1,6 +1,8 @@
-import { AlertTriangle, RotateCw, type LucideIcon } from 'lucide-react'
+import { AlertTriangle, Compass, RotateCw, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { ButtonLink } from '@/components/ButtonLink'
 import { Button } from '@/components/ui/button'
+import { ApiError } from '@/lib/api'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
@@ -26,6 +28,16 @@ export function EmptyState({ icon: Icon, title, description, action, className }
 }
 
 export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
+  if (error instanceof ApiError && error.status === 404) {
+    return (
+      <EmptyState
+        icon={Compass}
+        title="Niet gevonden"
+        description={`${error.message} Mogelijk is het verwijderd of klopt de link niet.`}
+        action={<ButtonLink to="/">Naar het dashboard</ButtonLink>}
+      />
+    )
+  }
   const message = error instanceof Error ? error.message : 'Er ging iets mis bij het laden.'
   return (
     <div role="alert" className="flex flex-col items-center justify-center rounded-xl border border-destructive/30 bg-destructive/5 px-6 py-10 text-center">

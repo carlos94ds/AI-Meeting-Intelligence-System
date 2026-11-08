@@ -9,7 +9,9 @@
     "dev:frontend": "npm --prefix frontend run dev",
     "seed": "node scripts/run-backend.mjs seed --reset",
     "test": "node scripts/run-backend.mjs test",
-    "build": "npm --prefix frontend run build"
+    "build": "npm --prefix frontend run build",
+    "screenshots": "node scripts/screenshots.mjs",
+    "schemas": "node scripts/run-backend.mjs schemas"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

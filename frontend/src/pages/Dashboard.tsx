@@ -106,7 +106,7 @@ function DashboardContent({ data }: { data: DashboardData }) {
         <KpiCard label="Afgerond deze week" value={kpis.completed_this_week} icon={CheckCircle2} tone="text-status-afgerond" to="/actiepunten?status=afgerond" />
       </section>
 
-      <div className="grid items-start gap-6 xl:grid-cols-3">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-3">
         <AttentionCard items={data.attention} />
         <NextMeetingCard data={data} />
       </div>

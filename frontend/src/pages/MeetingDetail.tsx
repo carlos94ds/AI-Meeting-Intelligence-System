@@ -111,19 +111,19 @@ export function MeetingDetail() {
   return (
     <TranscriptFocusContext.Provider value={focusCtx}>
       <MeetingHeader meeting={data} />
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <TranscriptView
           segments={data.segments}
           focusRequest={activeFocus}
           className="h-[60vh] lg:sticky lg:top-20 lg:order-none lg:h-[calc(100dvh-7rem)]"
         />
-        <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="min-w-0 gap-4">
+        <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="order-first min-w-0 gap-4 lg:order-none">
           <TabsList className="w-full sm:w-fit">
             <TabsTrigger value="samenvatting">
-              <MessagesSquare /> Samenvatting
+              <MessagesSquare className="max-sm:hidden" /> Samenvatting
             </TabsTrigger>
             <TabsTrigger value="actiepunten">
-              <ListChecks /> Actiepunten
+              <ListChecks className="max-sm:hidden" /> Actiepunten
               {pendingReview > 0 && (
                 <span className="ml-0.5 rounded-full bg-primary px-1.5 text-[11px] leading-4 text-primary-foreground tabular-nums">
                   {pendingReview}
@@ -131,7 +131,7 @@ export function MeetingDetail() {
               )}
             </TabsTrigger>
             <TabsTrigger value="vergelijking">
-              <GitCompareArrows /> <span className="hidden sm:inline">Vergelijking</span>
+              <GitCompareArrows className="max-sm:hidden" /> <span className="hidden sm:inline">Vergelijking</span>
               <span className="sm:hidden">Vergel.</span>
               {data.pending_suggestion_count > 0 && (
                 <span className="ml-0.5 rounded-full bg-primary px-1.5 text-[11px] leading-4 text-primary-foreground tabular-nums">

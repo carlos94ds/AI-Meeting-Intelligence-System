@@ -14,6 +14,7 @@ import {
   Target,
 } from 'lucide-react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { ButtonLink } from '@/components/ButtonLink'
 import { MeetingList } from '@/components/MeetingList'
 import { OwnerChip } from '@/components/OwnerChip'
 import { PreparationPanel } from '@/components/PreparationPanel'
@@ -148,7 +149,7 @@ function OverviewTab({ project }: { project: Project }) {
         ))}
       </dl>
 
-      <div className="grid items-start gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
         <section aria-labelledby="goals" className="rounded-xl border bg-card p-5">
           <h2 id="goals" className="mb-4 flex items-center gap-2 text-sm font-semibold">
             <Target className="size-4 text-muted-foreground" aria-hidden /> Doelstellingen
@@ -179,6 +180,15 @@ function OverviewTab({ project }: { project: Project }) {
           <h2 id="timeline" className="mb-4 flex items-center gap-2 text-sm font-semibold">
             <CalendarDays className="size-4 text-muted-foreground" aria-hidden /> Tijdlijn
           </h2>
+          {timeline.length === 0 && !project.next_meeting_date ? (
+            <EmptyState
+              icon={CalendarDays}
+              title="Nog geen vergaderingen"
+              description="Upload de opname van de eerste vergadering om de tijdlijn te starten."
+              action={<ButtonLink to="/vergaderingen/nieuw">Vergadering toevoegen</ButtonLink>}
+              className="py-8"
+            />
+          ) : (
           <ol className="relative ml-2 space-y-5 border-l pl-6">
             {timeline.map((m) => (
               <li key={m.id} className="relative">
@@ -206,6 +216,7 @@ function OverviewTab({ project }: { project: Project }) {
               </li>
             )}
           </ol>
+          )}
         </section>
       </div>
     </div>
@@ -214,7 +225,7 @@ function OverviewTab({ project }: { project: Project }) {
 
 function ProgressTab({ project }: { project: Project }) {
   return (
-    <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+    <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       {project.progress_per_meeting.length === 0 ? (
         <EmptyState icon={LineChart} title="Nog geen voortgang" description="Na de eerste vergadering verschijnt hier de grafiek." />
       ) : (

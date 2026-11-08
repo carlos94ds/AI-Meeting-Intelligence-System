@@ -9,6 +9,8 @@ const args =
     ? ['-m', 'app.seed', ...rest]
     : mode === 'test'
       ? ['-m', 'pytest', ...rest]
+      : mode === 'schemas'
+        ? ['-m', 'app.ai.export_schemas']
       : ['-m', 'uvicorn', 'app.main:app', '--reload', '--host', '127.0.0.1', '--port', '8000']
 
 const child = spawn(python, args, { cwd: backendDir, stdio: 'inherit' })

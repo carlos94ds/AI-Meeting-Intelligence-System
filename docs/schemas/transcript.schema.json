@@ -1,0 +1,65 @@
+{
+  "$defs": {
+    "TranscriptSegmentData": {
+      "properties": {
+        "speaker_label": {
+          "description": "Diarisatielabel, bijv. 'Spreker 1'",
+          "title": "Speaker Label",
+          "type": "string"
+        },
+        "start_seconds": {
+          "title": "Start Seconds",
+          "type": "number"
+        },
+        "end_seconds": {
+          "title": "End Seconds",
+          "type": "number"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "speaker_label",
+        "start_seconds",
+        "end_seconds",
+        "text"
+      ],
+      "title": "TranscriptSegmentData",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "language": {
+      "default": "nl",
+      "title": "Language",
+      "type": "string"
+    },
+    "duration_seconds": {
+      "title": "Duration Seconds",
+      "type": "number"
+    },
+    "participant_names": {
+      "description": "Bekende deelnemers; helpt bij het herkennen van eigenaren",
+      "items": {
+        "type": "string"
+      },
+      "title": "Participant Names",
+      "type": "array"
+    },
+    "segments": {
+      "items": {
+        "$ref": "#/$defs/TranscriptSegmentData"
+      },
+      "title": "Segments",
+      "type": "array"
+    }
+  },
+  "required": [
+    "duration_seconds",
+    "segments"
+  ],
+  "title": "Transcript",
+  "type": "object"
+}

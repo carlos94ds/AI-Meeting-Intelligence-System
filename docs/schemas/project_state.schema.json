@@ -1,0 +1,130 @@
+{
+  "$defs": {
+    "ActionItemState": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "integer"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "owner_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Owner Name"
+        },
+        "status": {
+          "$ref": "#/$defs/ActionStatus"
+        },
+        "deadline": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Deadline"
+        },
+        "postpone_count": {
+          "title": "Postpone Count",
+          "type": "integer"
+        },
+        "goal_title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Goal Title"
+        },
+        "last_source_segment_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Source Segment Id"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "owner_name",
+        "status",
+        "deadline",
+        "postpone_count"
+      ],
+      "title": "ActionItemState",
+      "type": "object"
+    },
+    "ActionStatus": {
+      "enum": [
+        "voorgesteld",
+        "open",
+        "uitgesteld",
+        "gemeld_afgerond",
+        "afgerond",
+        "vervallen"
+      ],
+      "title": "ActionStatus",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "project_name": {
+      "title": "Project Name",
+      "type": "string"
+    },
+    "goals": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Goals",
+      "type": "array"
+    },
+    "action_items": {
+      "items": {
+        "$ref": "#/$defs/ActionItemState"
+      },
+      "title": "Action Items",
+      "type": "array"
+    },
+    "postpone_threshold": {
+      "default": 2,
+      "title": "Postpone Threshold",
+      "type": "integer"
+    },
+    "today": {
+      "format": "date",
+      "title": "Today",
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_name",
+    "goals",
+    "action_items",
+    "today"
+  ],
+  "title": "ProjectState",
+  "type": "object"
+}

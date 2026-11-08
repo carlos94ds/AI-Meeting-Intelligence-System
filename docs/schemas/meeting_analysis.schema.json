@@ -1,0 +1,205 @@
+{
+  "$defs": {
+    "ExtractedActionItem": {
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "owner_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Naam zoals in de deelnemerslijst, of null",
+          "title": "Owner Name"
+        },
+        "deadline": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deadline"
+        },
+        "goal_hint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Titel van de doelstelling waar dit bij hoort",
+          "title": "Goal Hint"
+        },
+        "segment_index": {
+          "minimum": 0,
+          "title": "Segment Index",
+          "type": "integer"
+        },
+        "confidence": {
+          "default": 0.8,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "title",
+        "segment_index"
+      ],
+      "title": "ExtractedActionItem",
+      "type": "object"
+    },
+    "ProgressUpdate": {
+      "description": "Uitspraak over de voortgang van eerder afgesproken werk.",
+      "properties": {
+        "subject_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Over wiens taak gaat dit",
+          "title": "Subject Name"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "kind": {
+          "description": "gemeld_afgerond | uitgesteld | bezig | vervallen",
+          "title": "Kind",
+          "type": "string"
+        },
+        "new_deadline": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "New Deadline"
+        },
+        "segment_index": {
+          "minimum": 0,
+          "title": "Segment Index",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "text",
+        "kind",
+        "segment_index"
+      ],
+      "title": "ProgressUpdate",
+      "type": "object"
+    },
+    "SourcedText": {
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "segment_index": {
+          "minimum": 0,
+          "title": "Segment Index",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "text",
+        "segment_index"
+      ],
+      "title": "SourcedText",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "topics": {
+      "items": {
+        "$ref": "#/$defs/SourcedText"
+      },
+      "title": "Topics",
+      "type": "array"
+    },
+    "decisions": {
+      "items": {
+        "$ref": "#/$defs/SourcedText"
+      },
+      "title": "Decisions",
+      "type": "array"
+    },
+    "problems": {
+      "items": {
+        "$ref": "#/$defs/SourcedText"
+      },
+      "title": "Problems",
+      "type": "array"
+    },
+    "ideas": {
+      "items": {
+        "$ref": "#/$defs/SourcedText"
+      },
+      "title": "Ideas",
+      "type": "array"
+    },
+    "agreements": {
+      "items": {
+        "$ref": "#/$defs/SourcedText"
+      },
+      "title": "Agreements",
+      "type": "array"
+    },
+    "deadlines": {
+      "items": {
+        "$ref": "#/$defs/SourcedText"
+      },
+      "title": "Deadlines",
+      "type": "array"
+    },
+    "action_items": {
+      "items": {
+        "$ref": "#/$defs/ExtractedActionItem"
+      },
+      "title": "Action Items",
+      "type": "array"
+    },
+    "progress_updates": {
+      "items": {
+        "$ref": "#/$defs/ProgressUpdate"
+      },
+      "title": "Progress Updates",
+      "type": "array"
+    }
+  },
+  "title": "MeetingAnalysis",
+  "type": "object"
+}

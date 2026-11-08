@@ -1,0 +1,66 @@
+{
+  "$defs": {
+    "ActionStatus": {
+      "enum": [
+        "voorgesteld",
+        "open",
+        "uitgesteld",
+        "gemeld_afgerond",
+        "afgerond",
+        "vervallen"
+      ],
+      "title": "ActionStatus",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "integer"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "owner_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Owner Name"
+    },
+    "status": {
+      "$ref": "#/$defs/ActionStatus"
+    },
+    "deadline": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Deadline"
+    },
+    "postpone_count": {
+      "default": 0,
+      "title": "Postpone Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "owner_name",
+    "status",
+    "deadline"
+  ],
+  "title": "OpenActionItemRef",
+  "type": "object"
+}
