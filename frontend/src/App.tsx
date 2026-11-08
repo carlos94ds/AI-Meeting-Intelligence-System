@@ -6,14 +6,16 @@ import { MeetingDetail } from '@/pages/MeetingDetail'
 import { Meetings } from '@/pages/Meetings'
 import { NotFound } from '@/pages/NotFound'
 import { Placeholder } from '@/pages/Placeholder'
+import { ProjectDetail } from '@/pages/ProjectDetail'
+import { Projects } from '@/pages/Projects'
 
 export default function App() {
   return (
     <Routes>
       <Route element={<AppLayout />}>
         <Route index element={<Dashboard />} />
-        <Route path="projecten" element={<Placeholder title="Projecten" phase={3} />} />
-        <Route path="projecten/:projectId" element={<Placeholder title="Project" phase={3} />} />
+        <Route path="projecten" element={<Projects />} />
+        <Route path="projecten/:projectId" element={<ProjectDetail />} />
         <Route path="actiepunten" element={<ActionItems />} />
         <Route path="vergaderingen" element={<Meetings />} />
         <Route path="vergaderingen/nieuw" element={<Placeholder title="Vergadering toevoegen" phase={4} />} />

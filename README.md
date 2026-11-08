@@ -100,6 +100,6 @@ Het systeem volgt **taken en projecten, geen personen**: er zijn bewust geen per
 
 - [x] **Fase 1 – Fundament**: backend, modellen, seed-data, MockProvider, API, frontend-skelet, thema, dashboard
 - [x] **Fase 2 – Kernschermen**: vergadering detail (transcript, samenvatting, review, bronlinks), actiepunten (tabel + kanban + historiepaneel)
-- [ ] Fase 3 – USP-schermen: vergelijking, voorbereiding, voortgangsgrafiek
+- [x] **Fase 3 – USP-schermen**: vergelijkingsweergave, voorbereiding (vragen + conceptagenda met drag & drop), projectpagina's met voortgangsgrafiek
 - [ ] Fase 4 – Upload-wizard, sprekers koppelen, instellingen
 - [ ] Fase 5 – Afwerking, README met screenshots, `docs/LLM_INTEGRATIE.md`

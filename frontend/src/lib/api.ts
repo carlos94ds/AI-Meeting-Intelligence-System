@@ -13,6 +13,7 @@ import type {
   PreparationInput,
   ProcessingStatus,
   ProjectDetail,
+  ProjectInput,
   ProjectSummary,
   StatusChange,
   SuggestionDecision,
@@ -80,6 +81,7 @@ export const api = {
   dashboard: (projectId?: number) => request<Dashboard>(`/dashboard${query({ project_id: projectId })}`),
 
   projects: () => request<ProjectSummary[]>('/projects'),
+  createProject: (body: ProjectInput) => json<ProjectSummary>('POST', '/projects', body),
   project: (id: number) => request<ProjectDetail>(`/projects/${id}`),
   projectMeetings: (id: number) => request<MeetingSummary[]>(`/projects/${id}/meetings`),
   preparation: (projectId: number) => request<Preparation>(`/projects/${projectId}/preparation`),

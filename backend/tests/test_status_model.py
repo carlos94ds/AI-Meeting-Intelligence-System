@@ -78,3 +78,16 @@ def test_api_bewijs_rondt_af(client) -> None:  # type: ignore[no-untyped-def]
     assert body["status"] == "afgerond" and body["evidence_url"] == "https://voorbeeld.nl/ontwerp"
     history = client.get(f"/api/action-items/{item_id}/history").json()
     assert history[-1]["to_status"] == "afgerond"
+
+
+def test_vergelijking_telt_onbevestigde_afronding_niet_als_afgerond(client) -> None:  # type: ignore[no-untyped-def]
+    meetings = client.get("/api/meetings", params={"project_id": 1}).json()
+    latest = meetings[0]["id"]
+    cmp = client.get(f"/api/meetings/{latest}/comparison").json()
+    pending_to_done = [
+        i for i in cmp["items"]
+        if i["suggestion"] and i["suggestion"]["state"] == "pending" and i["suggestion"]["to_status"] == "afgerond"
+    ]
+    assert pending_to_done, "seed bevat een AI-voorstel gemeld → afgerond"
+    confirmed_done = sum(1 for i in cmp["items"] if i["action_item"]["status"] == "afgerond")
+    assert cmp["counts"]["afgerond"] == confirmed_done

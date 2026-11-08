@@ -216,9 +216,13 @@ def comparison(meeting_id: int, session: Session = Depends(get_session)) -> Comp
         if before in (ActionStatus.VOORGESTELD, ActionStatus.VERVALLEN) and suggestion is None:
             continue
         previous_status = suggestion.from_status if suggestion and suggestion.from_status else before
-        result = suggestion.to_status if suggestion and suggestion.state.value == "pending" else item.status
-        if suggestion and suggestion.state.value == "pending":
+        pending = suggestion is not None and suggestion.state.value == "pending"
+        result = suggestion.to_status if pending and suggestion else item.status
+        if pending:
             counts.te_beoordelen += 1
+            # Een nog niet bevestigde afronding telt nooit als "afgerond".
+            if result == ActionStatus.AFGEROND:
+                result = ActionStatus.GEMELD_AFGEROND
         match result:
             case ActionStatus.AFGEROND:
                 counts.afgerond += 1

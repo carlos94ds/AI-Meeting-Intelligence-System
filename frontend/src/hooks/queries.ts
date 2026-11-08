@@ -41,3 +41,9 @@ export const useHistory = (id: number | undefined) =>
   useQuery({ queryKey: keys.history(id ?? -1), queryFn: () => api.history(id!), enabled: id !== undefined })
 
 export const useSettings = () => useQuery({ queryKey: keys.settings, queryFn: api.settings })
+
+export const usePreparation = (projectId: number) =>
+  useQuery({ queryKey: ['preparation', projectId], queryFn: () => api.preparation(projectId) })
+
+export const useComparison = (meetingId: number) =>
+  useQuery({ queryKey: keys.comparison(meetingId), queryFn: () => api.comparison(meetingId) })

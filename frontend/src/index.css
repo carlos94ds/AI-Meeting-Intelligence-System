@@ -110,6 +110,10 @@
     --status-afgerond-bg: oklch(0.95 0.05 155);
     --status-vervallen: oklch(0.55 0.01 260);
     --status-vervallen-bg: oklch(0.96 0.003 260);
+
+    /* Grafiekreeksen, gevalideerd met de dataviz-validator (licht, oppervlak #ffffff) */
+    --viz-open: #3370c7;
+    --viz-done: #2c965d;
 }
 
 .dark {
@@ -157,6 +161,10 @@
     --status-afgerond-bg: oklch(0.28 0.06 155);
     --status-vervallen: oklch(0.65 0.01 260);
     --status-vervallen-bg: oklch(0.24 0.005 260);
+
+    /* Grafiekreeksen, gevalideerd tegen het donkere oppervlak */
+    --viz-open: #538ce0;
+    --viz-done: #43a96e;
 }
 
 @layer base {

@@ -22,6 +22,7 @@ import { toast } from 'sonner'
 import { ActionItemCard } from '@/components/ActionItemCard'
 import { DeadlineLabel } from '@/components/ActionItemMeta'
 import { ButtonLink } from '@/components/ButtonLink'
+import { ComparisonView } from '@/components/ComparisonView'
 import { Initials, OwnerChip } from '@/components/OwnerChip'
 import { SourceLink } from '@/components/SourceLink'
 import { CardSkeleton, EmptyState, ErrorState } from '@/components/States'
@@ -146,11 +147,7 @@ export function MeetingDetail() {
             <ActionItemsTab meeting={data} />
           </TabsContent>
           <TabsContent value="vergelijking">
-            <EmptyState
-              icon={GitCompareArrows}
-              title="Vergelijking met vorige vergadering"
-              description="Hier zie je straks per actiepunt de vorige status → de voorgestelde nieuwe status, met het citaat als bron. Wordt gebouwd in fase 3."
-            />
+            <ComparisonView meetingId={data.id} />
           </TabsContent>
         </Tabs>
       </div>

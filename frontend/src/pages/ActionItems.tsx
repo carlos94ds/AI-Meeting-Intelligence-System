@@ -24,8 +24,23 @@ type View = 'tabel' | 'kanban'
 type SortKey = 'deadline' | 'status' | 'titel'
 
 export function ActionItems() {
-  const [params, setParams] = useSearchParams()
   const { projectId, setProjectId } = useProjectScope()
+  return (
+    <>
+      <PageHeader title="Actiepunten" description="Alle taken over alle projecten. Klik op een actiepunt voor de volledige historie." />
+      <ActionItemsBrowser projectId={projectId} onProjectChange={setProjectId} />
+    </>
+  )
+}
+
+interface BrowserProps {
+  projectId: number | undefined
+  /** Weglaten = project staat vast (bijv. binnen een projectpagina). */
+  onProjectChange?: (id: number | undefined) => void
+}
+
+export function ActionItemsBrowser({ projectId, onProjectChange }: BrowserProps) {
+  const [params, setParams] = useSearchParams()
   const { data: projects } = useProjects()
   const { data: project } = useProject(projectId)
   const { data: participants } = useParticipants()
@@ -93,29 +108,35 @@ export function ActionItems() {
   const goalItems: Record<string, string> = { [ALL]: 'Alle doelen' }
   for (const g of project?.goals ?? []) goalItems[String(g.id)] = g.title
 
+  const viewToggle = (
+    <div role="group" aria-label="Weergave" className="ml-auto inline-flex rounded-lg border p-0.5">
+      <Button variant={view === 'tabel' ? 'secondary' : 'ghost'} size="sm" aria-pressed={view === 'tabel'} onClick={() => update({ weergave: null })}>
+        <Rows3 /> Tabel
+      </Button>
+      <Button variant={view === 'kanban' ? 'secondary' : 'ghost'} size="sm" aria-pressed={view === 'kanban'} onClick={() => update({ weergave: 'kanban' })}>
+        <Columns3 /> Kanban
+      </Button>
+    </div>
+  )
+
   return (
     <>
-      <PageHeader
-        title="Actiepunten"
-        description="Alle taken over alle projecten. Klik op een actiepunt voor de volledige historie."
-        actions={
-          <div role="group" aria-label="Weergave" className="inline-flex rounded-lg border p-0.5">
-            <Button variant={view === 'tabel' ? 'secondary' : 'ghost'} size="sm" aria-pressed={view === 'tabel'} onClick={() => update({ weergave: null })}>
-              <Rows3 /> Tabel
-            </Button>
-            <Button variant={view === 'kanban' ? 'secondary' : 'ghost'} size="sm" aria-pressed={view === 'kanban'} onClick={() => update({ weergave: 'kanban' })}>
-              <Columns3 /> Kanban
-            </Button>
-          </div>
-        }
-      />
-
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="relative w-full sm:w-64">
           <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
           <Input value={q} onChange={(e) => update({ q: e.target.value })} placeholder="Zoeken…" aria-label="Zoek in actiepunten" className="pl-8" />
         </div>
-        <FilterSelect label="Project" items={projectItems} value={projectId === undefined ? ALL : String(projectId)} onChange={(v) => { setProjectId(v === ALL ? undefined : Number(v)); update({ doel: null, eigenaar: null }) }} />
+        {onProjectChange && (
+          <FilterSelect
+            label="Project"
+            items={projectItems}
+            value={projectId === undefined ? ALL : String(projectId)}
+            onChange={(v) => {
+              onProjectChange(v === ALL ? undefined : Number(v))
+              update({ doel: null, eigenaar: null })
+            }}
+          />
+        )}
         <FilterSelect label="Eigenaar" items={ownerItems} value={owner} onChange={(v) => update({ eigenaar: v })} />
         {projectId !== undefined && <FilterSelect label="Doel" items={goalItems} value={goal} onChange={(v) => update({ doel: v })} />}
         <Button variant={overdueOnly ? 'secondary' : 'outline'} aria-pressed={overdueOnly} onClick={() => update({ achterstallig: overdueOnly ? null : '1' })}>
@@ -126,6 +147,7 @@ export function ActionItems() {
             <FilterX /> Filters wissen
           </Button>
         )}
+        {viewToggle}
       </div>
 
       <div role="group" aria-label="Filter op status" className="mb-5 flex flex-wrap gap-1.5">

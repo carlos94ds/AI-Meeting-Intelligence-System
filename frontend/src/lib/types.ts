@@ -319,3 +319,10 @@ export interface ActionItemFilters {
   status?: ActionStatus[]
   q?: string
 }
+
+export interface ProjectInput {
+  name: string
+  description: string
+  goals: string[]
+  participant_ids: number[]
+}
