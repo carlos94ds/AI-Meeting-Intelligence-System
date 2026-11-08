@@ -5,10 +5,10 @@
 Klikbaar prototype dat vergaderingen omzet in samenvattingen, besluiten en actiepunten. Het volgt de voortgang
 van actiepunten over meerdere vergaderingen en helpt de volgende vergadering voor te bereiden.
 
-Er is **nog geen echte LLM of spraakherkenning** aangesloten. Alle AI-functies lopen via een `MockProvider`
-met realistische Nederlandse demodata. De UI praat alleen met de abstracte `AIProvider`-interface, zodat een
-echte LLM en Whisper later kunnen worden ingeplugd zonder de UI te wijzigen. Alles werkt offline.
-Zie [docs/LLM_INTEGRATIE.md](docs/LLM_INTEGRATIE.md).
+Standaard lopen alle AI-functies via een `MockProvider` met realistische Nederlandse demodata, volledig offline.
+Met `AI_PROVIDER=anthropic` analyseert **Claude** de vergaderingen en transcribeert **Whisper** de opnames
+lokaal op je eigen computer. De UI praat alleen met de abstracte `AIProvider`-interface. Zie
+[docs/LLM_INTEGRATIE.md](docs/LLM_INTEGRATIE.md).
 
 ![Dashboard](docs/screenshots/dashboard-licht.png)
 
@@ -56,9 +56,19 @@ datums zijn relatief aan vandaag, zodat de demo altijd actueel oogt.
 | `npm run build`       | Productiebuild van de frontend (inclusief typecontrole) |
 | `npm run screenshots` | Screenshots maken van de belangrijkste schermen (zie hieronder) |
 | `npm run schemas`     | JSON-schema's van de AI-output exporteren naar `docs/schemas/` |
+| `npm run setup:ai`    | Extra pakketten voor echte AI installeren (Claude + Whisper) |
 
 Configuratie staat in `.env` (zie [`.env.example`](.env.example)). Standaard: `AI_PROVIDER=mock`.
 `MOCK_DELAY_SECONDS` bepaalt hoe lang elke gesimuleerde AI-stap duurt.
+
+### Echte AI inschakelen (Claude + lokale Whisper)
+
+```bash
+npm run setup:ai          # eenmalig: anthropic + faster-whisper
+```
+
+Zet daarna in `.env`: `AI_PROVIDER=anthropic` en `ANTHROPIC_API_KEY=sk-ant-...`, en herstart met `npm run dev`.
+Details, kosten en beperkingen: [docs/LLM_INTEGRATIE.md](docs/LLM_INTEGRATIE.md).
 
 ## Rondleiding door de demo
 
@@ -153,7 +163,7 @@ gebruikersactie (**Bevestigen** of **Bewijs toevoegen**). De AI mag zelf nooit i
 
 Het systeem volgt **taken en projecten, geen personen**: er zijn bewust geen persoonsscores of ranglijsten
 (AVG / AI Act). Een upload vereist de bevestiging dat alle deelnemers over de opname zijn geïnformeerd. In het
-prototype wordt audio nooit op schijf bewaard.
+prototype wordt audio alleen tijdens het transcriberen tijdelijk opgeslagen en daarna direct verwijderd.
 
 ## Fasering
 
@@ -161,4 +171,5 @@ prototype wordt audio nooit op schijf bewaard.
 - [x] **Fase 2 – Kernschermen**: vergadering detail (transcript, samenvatting, review, bronlinks), actiepunten (tabel + kanban + historiepaneel)
 - [x] **Fase 3 – USP-schermen**: vergelijkingsweergave, voorbereiding (vragen + conceptagenda met drag & drop), projectpagina's met voortgangsgrafiek
 - [x] **Fase 4 – Wizard en instellingen**: upload-wizard met gesimuleerde verwerking in 5 stappen, sprekers koppelen, instellingen
+- [x] **Echte AI**: Claude (analyse) + lokale Whisper (transcriptie), validatie van AI-output, opnieuw analyseren
 - [x] **Fase 5 – Afwerking**: lege toestanden en laadtoestanden, donker thema en responsive controle, screenshots, [LLM-integratiegids](docs/LLM_INTEGRATIE.md)

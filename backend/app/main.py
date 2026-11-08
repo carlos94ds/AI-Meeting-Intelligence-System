@@ -7,7 +7,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .ai import get_provider
 from .config import get_settings
 from .routers import action_items, dashboard, meetings, projects, settings
 from .seed import seed_if_empty
@@ -40,4 +39,5 @@ for r in (projects.router, meetings.router, action_items.router, dashboard.route
 
 @app.get("/api/health", tags=["Systeem"])
 def health() -> dict[str, str]:
-    return {"status": "ok", "ai_provider": get_provider().name}
+    settings = get_settings()
+    return {"status": "ok", "ai_provider": settings.ai_provider.lower(), "transcriber": settings.transcriber.lower()}

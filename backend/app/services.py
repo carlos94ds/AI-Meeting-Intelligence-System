@@ -182,6 +182,7 @@ def meeting_summary_out(meeting: Meeting, lk: Lookup) -> MeetingSummaryOut:
         duration_minutes=meeting.duration_minutes,
         participant_count=participant_count,
         processing_state=meeting.processing_state,
+        processing_error=meeting.processing_error,
         action_item_count=len(items),
         pending_review_count=sum(1 for i in items if i.status == S.VOORGESTELD),
         pending_suggestion_count=len(pending_suggestions),

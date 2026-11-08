@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, col, select
 
+from ..ai.errors import AIProviderError
 from ..db import get_session
 from ..models import ACTIVE_STATUSES, AgendaItem, Goal, PrepQuestion, Project, ProjectParticipant
 from ..processing import regenerate_preparation
@@ -109,5 +110,8 @@ def put_preparation(project_id: int, body: PreparationIn, session: Session = Dep
 @router.post("/{project_id}/preparation/regenerate", response_model=PreparationOut)
 async def regenerate(project_id: int, session: Session = Depends(get_session)) -> PreparationOut:
     project = _get_project(session, project_id)
-    await regenerate_preparation(session, project_id)
+    try:
+        await regenerate_preparation(session, project_id)
+    except AIProviderError as exc:
+        raise HTTPException(502, str(exc)) from exc
     return preparation_out(session, project, Lookup(session))

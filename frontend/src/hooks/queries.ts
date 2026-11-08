@@ -27,7 +27,13 @@ export const useProject = (id: number | undefined) =>
 export const useMeetings = (projectId?: number) =>
   useQuery({ queryKey: keys.meetings(projectId), queryFn: () => api.meetings(projectId) })
 
-export const useMeeting = (id: number) => useQuery({ queryKey: keys.meeting(id), queryFn: () => api.meeting(id) })
+export const useMeeting = (id: number) =>
+  useQuery({
+    queryKey: keys.meeting(id),
+    queryFn: () => api.meeting(id),
+    // Tijdens de verwerking automatisch verversen
+    refetchInterval: (q) => (q.state.data && ['pending', 'processing'].includes(q.state.data.processing_state) ? 2000 : false),
+  })
 
 export const useParticipants = () => useQuery({ queryKey: keys.participants, queryFn: api.participants })
 

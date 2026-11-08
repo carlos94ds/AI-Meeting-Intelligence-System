@@ -1,0 +1,3 @@
+# Optioneel: nodig voor echte AI (AI_PROVIDER=anthropic). Installeer met: npm run setup:ai
+anthropic>=2.6
+faster-whisper>=1.2

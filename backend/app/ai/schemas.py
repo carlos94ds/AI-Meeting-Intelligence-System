@@ -35,6 +35,9 @@ class Transcript(BaseModel):
         default_factory=list, description="Bekende deelnemers; helpt bij het herkennen van eigenaren"
     )
     segments: list[TranscriptSegmentData]
+    # Context die de pijplijn na het transcriberen invult (niet door spraakherkenning):
+    meeting_date: date | None = Field(default=None, description="Datum van de vergadering; basis voor relatieve deadlines")
+    project_goals: list[str] = Field(default_factory=list, description="Doelstellingen van het project")
 
 
 # --------------------------------------------------------------------------- extractie

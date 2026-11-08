@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
+from ..config import get_settings
 from ..db import get_session
 from ..schemas import SettingsIn, SettingsOut
 from ..services import get_app_settings
@@ -9,16 +10,23 @@ router = APIRouter(prefix="/settings", tags=["Instellingen"])
 
 PROVIDERS: list[dict[str, str | bool]] = [
     {"id": "mock", "label": "Mock (demodata, offline)", "available": True},
+    {"id": "anthropic", "label": "Anthropic (Claude)", "available": True},
     {"id": "openai", "label": "OpenAI", "available": False},
-    {"id": "anthropic", "label": "Anthropic (Claude)", "available": False},
-    {"id": "local", "label": "Lokaal model (Whisper + LLM)", "available": False},
 ]
 
 
 def _out(session: Session) -> SettingsOut:
     s = get_app_settings(session)
+    env = get_settings()
+    provider = env.ai_provider.lower()
     return SettingsOut(
-        ai_provider=s.ai_provider, available_providers=PROVIDERS, language=s.language,
+        # De actieve provider komt uit .env (AI_PROVIDER); wisselen vraagt een herstart van de backend.
+        ai_provider=provider,
+        ai_model=env.anthropic_model if provider == "anthropic" else "demodata",
+        transcriber=("whisper" if env.transcriber.lower() != "mock" else "mock") if provider != "mock" else "mock",
+        whisper_model=env.whisper_model,
+        api_key_configured=bool(env.anthropic_api_key) if provider == "anthropic" else False,
+        available_providers=PROVIDERS, language=s.language,
         audio_retention=s.audio_retention, transcript_retention=s.transcript_retention,
         consent_required=s.consent_required, postpone_threshold=s.postpone_threshold, current_user=s.current_user,
     )

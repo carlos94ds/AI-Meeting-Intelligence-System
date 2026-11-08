@@ -11,7 +11,8 @@
     "test": "node scripts/run-backend.mjs test",
     "build": "npm --prefix frontend run build",
     "screenshots": "node scripts/screenshots.mjs",
-    "schemas": "node scripts/run-backend.mjs schemas"
+    "schemas": "node scripts/run-backend.mjs schemas",
+    "setup:ai": "node scripts/run-backend.mjs pip install -r requirements-ai.txt"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

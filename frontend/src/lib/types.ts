@@ -126,6 +126,7 @@ export interface MeetingSummary {
   duration_minutes: number
   participant_count: number
   processing_state: ProcessingState
+  processing_error: string | null
   action_item_count: number
   pending_review_count: number
   pending_suggestion_count: number
@@ -297,7 +298,13 @@ export interface ProviderOption {
 }
 
 export interface AppSettings {
+  /** Actieve provider uit .env (AI_PROVIDER) */
   ai_provider: string
+  ai_model: string
+  /** whisper | mock */
+  transcriber: string
+  whisper_model: string
+  api_key_configured: boolean
   available_providers: ProviderOption[]
   language: 'nl' | 'en'
   audio_retention: 'direct' | '30d' | '90d'

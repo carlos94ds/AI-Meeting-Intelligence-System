@@ -54,6 +54,28 @@
       },
       "title": "Segments",
       "type": "array"
+    },
+    "meeting_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Datum van de vergadering; basis voor relatieve deadlines",
+      "title": "Meeting Date"
+    },
+    "project_goals": {
+      "description": "Doelstellingen van het project",
+      "items": {
+        "type": "string"
+      },
+      "title": "Project Goals",
+      "type": "array"
     }
   },
   "required": [

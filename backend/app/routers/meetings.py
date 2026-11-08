@@ -19,7 +19,7 @@ from ..models import (
     SummaryItem,
     TranscriptSegment,
 )
-from ..processing import PROCESSING_STEPS, process_meeting
+from ..processing import PROCESSING_STEPS, process_meeting, reanalyze_meeting
 from ..schemas import (
     ComparisonCounts,
     ComparisonItemOut,
@@ -176,6 +176,24 @@ def processing_status(meeting_id: int, session: Session = Depends(get_session)) 
         steps.append(ProcessingStepOut(key=key, label=label, state=state))  # type: ignore[arg-type]
     return ProcessingStatusOut(meeting_id=meeting_id, state=meeting.processing_state,
                                step=meeting.processing_step, steps=steps, error=meeting.processing_error)
+
+
+@router.post("/{meeting_id}/reanalyze", response_model=ProcessingStatusOut, status_code=202)
+def reanalyze(meeting_id: int, background: BackgroundTasks, session: Session = Depends(get_session)) -> ProcessingStatusOut:
+    """Analyse opnieuw uitvoeren met het opgeslagen transcript (na een mislukte verwerking)."""
+    meeting = _get_meeting(session, meeting_id)
+    if meeting.processing_state != ProcessingState.FAILED:
+        raise HTTPException(409, "Alleen een mislukte verwerking kan opnieuw worden gestart.")
+    has_transcript = session.exec(select(TranscriptSegment).where(TranscriptSegment.meeting_id == meeting_id)).first()
+    if has_transcript is None:
+        raise HTTPException(409, "Er is geen transcript opgeslagen. Upload de opname opnieuw.")
+    meeting.processing_state = ProcessingState.PROCESSING
+    meeting.processing_step = 3
+    meeting.processing_error = None
+    session.add(meeting)
+    session.commit()
+    background.add_task(reanalyze_meeting, meeting_id)
+    return processing_status(meeting_id, session)
 
 
 @router.put("/{meeting_id}/speakers", response_model=MeetingDetailOut)

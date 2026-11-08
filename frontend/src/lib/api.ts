@@ -96,6 +96,7 @@ export const api = {
   meeting: (id: number) => request<MeetingDetail>(`/meetings/${id}`),
   createMeeting: (form: FormData) => request<MeetingSummary>('/meetings', { method: 'POST', body: form }),
   processingStatus: (id: number) => request<ProcessingStatus>(`/meetings/${id}/processing-status`),
+  reanalyze: (id: number) => request<ProcessingStatus>(`/meetings/${id}/reanalyze`, { method: 'POST' }),
   mapSpeakers: (id: number, mapping: Record<string, number | null>) =>
     json<MeetingDetail>('PUT', `/meetings/${id}/speakers`, { mapping }),
   comparison: (id: number) => request<Comparison>(`/meetings/${id}/comparison`),

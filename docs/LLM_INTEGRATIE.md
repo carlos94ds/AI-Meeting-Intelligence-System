@@ -1,32 +1,77 @@
-# Een echte LLM en Whisper aansluiten
+# Echte AI: Claude en lokale Whisper
 
-Het prototype draait volledig op de `MockProvider`. De interface, de API en de database praten alleen met de
-abstracte `AIProvider`. Een echte taalmodel- en spraakherkenningskoppeling vervangt daarom **alleen de AI-laag**;
-frontend, routers en datamodel blijven ongewijzigd, zolang de nieuwe provider exact dezelfde JSON-schema's teruggeeft.
+Standaard draait het prototype op de `MockProvider` (offline demodata). Er is ook een **echte koppeling**:
+
+- **Claude** (Anthropic, model `claude-opus-5-5`) voor extractie, vergelijking en voorbereiding, via structured
+  outputs zodat de antwoorden exact de schema's uit `backend/app/ai/schemas.py` volgen;
+- **faster-whisper** voor lokale transcriptie: de audio verlaat de computer niet.
+
+De interface, de API en de database praten alleen met de abstracte `AIProvider`; voor de koppeling is aan de
+frontend niets veranderd behalve weergave (actieve modus, foutmeldingen, "Opnieuw analyseren").
+
+## Snel aan de slag
+
+1. Installeer de extra pakketten (eenmalig): `npm run setup:ai`
+2. Zet in `.env` (zie [`.env.example`](../.env.example)):
+   ```env
+   AI_PROVIDER=anthropic
+   ANTHROPIC_API_KEY=sk-ant-...
+   TRANSCRIBER=whisper
+   WHISPER_MODEL=small
+   ```
+3. Herstart: `npm run dev`. Onder **Instellingen** zie je de actieve provider en of de sleutel is ingesteld.
+4. Upload via **+ Vergadering toevoegen** een echte opname (mp3, m4a, wav, …).
+
+Bij de eerste transcriptie downloadt Whisper het model eenmalig (`small` ≈ 480 MB). Op een laptop zonder GPU
+duurt transcriberen ongeveer even lang als de opname; kies `WHISPER_MODEL=base` voor sneller en iets minder
+nauwkeurig, of `medium` voor nauwkeuriger en trager. Wil je alleen de analyse door Claude beoordelen, zet dan
+`TRANSCRIBER=mock`: dan wordt de vaste demotekst geanalyseerd.
+
+### Kosten en gedrag
+
+- Per vergadering doet de backend drie aanroepen naar Claude (analyseren, vergelijken, voorbereiden); bij een
+  vergadering zonder voortgangsuitspraken vervalt de vergelijking. `ANTHROPIC_EFFORT` (standaard `high`) bepaalt
+  hoe grondig Claude nadenkt; `medium` is goedkoper.
+- Weigert Claude een verzoek (veiligheidsfilter), dan probeert de API het automatisch op een ander model
+  (server-side fallback, `fallbacks: "default"`).
+- Mislukt de analyse (geen sleutel, netwerk, limiet), dan blijft het transcript bewaard en kun je in de wizard of
+  op de vergaderpagina op **Opnieuw analyseren** klikken; opnieuw uploaden is niet nodig.
+- Alle AI-output gaat door [`backend/app/ai/validation.py`](../backend/app/ai/validation.py): verwijzingen naar
+  niet-bestaande segmenten, onbekende namen of id's worden verwijderd, en een melding "het is klaar" wordt nooit
+  direct "Afgerond".
+
+### Beperkingen
+
+- **Sprekerherkenning** (diarisatie) zit er nog niet in: Whisper levert alles als "Spreker 1". Koppel sprekers
+  handmatig of laat het leeg. Uitbreiden kan met `pyannote.audio` (vereist een Hugging Face-token), zie §5.
+- De OpenAI-provider is nog een stub.
+
+## Hoe het in elkaar zit
 
 ```mermaid
 flowchart LR
   UI[React-frontend] -->|REST /api| API[FastAPI-routers]
   API --> PIPE[processing.py<br/>verwerkingspijplijn]
   PIPE --> IFACE{{AIProvider}}
-  IFACE --> MOCK[MockProvider<br/>nu actief]
-  IFACE -.-> LLM[AnthropicProvider / OpenAIProvider<br/>extract · match · prepare_next]
-  IFACE -.-> STT[WhisperProvider<br/>transcribe]
+  IFACE --> MOCK[MockProvider<br/>AI_PROVIDER=mock]
+  IFACE --> LLM[AnthropicProvider<br/>extract · match · prepare_next]
+  LLM --> STT[WhisperProvider<br/>transcribe, lokaal]
+  PIPE --> VAL[validation.py<br/>controle van AI-output]
 ```
 
-## 1. Welke bestanden pas je aan?
+## 1. Welke bestanden horen bij de koppeling?
 
 | Bestand | Wat er moet gebeuren |
 |---|---|
-| `backend/app/ai/anthropic_provider.py` (of `openai_provider.py`) | `extract`, `match` en `prepare_next` implementeren (zie §4). `transcribe` delegeren naar Whisper. |
-| `backend/app/ai/whisper_provider.py` | `transcribe` implementeren: audio → `Transcript` met sprekerlabels en tijdstempels (zie §5). |
-| `backend/app/ai/__init__.py` | In `get_provider()` de nieuwe provider teruggeven, bijvoorbeeld een samengestelde provider (Whisper voor spraak, LLM voor de rest). |
-| `backend/requirements.txt` | SDK's toevoegen, bijv. `anthropic` en `faster-whisper`. |
-| `.env` | `AI_PROVIDER=anthropic` en `ANTHROPIC_API_KEY=...` (nooit in code of versiebeheer). |
-| `backend/app/routers/settings.py` | In `PROVIDERS` de gekozen provider op `"available": True` zetten, zodat de instellingenpagina hem toont. |
+| `backend/app/ai/anthropic_provider.py` | ✅ `extract`, `match` en `prepare_next` met Claude (zie §4); `transcribe` delegeert naar de transcriber. |
+| `backend/app/ai/prompts.py` | ✅ De drie systeemprompts (Nederlands, stabiel voor caching). |
+| `backend/app/ai/whisper_provider.py` | ✅ Lokale transcriptie met faster-whisper (zie §5). |
+| `backend/app/ai/validation.py` | ✅ Controle van AI-output, voor elke provider. |
+| `backend/app/ai/__init__.py` | ✅ `get_provider()` / `get_transcriber()` kiezen op basis van `.env`. |
+| `backend/requirements-ai.txt` | ✅ `anthropic` en `faster-whisper` (installeren met `npm run setup:ai`). |
+| `backend/app/ai/openai_provider.py` | Nog een stub; zelfde patroon als de Anthropic-provider. |
 
-**Niet aanpassen:** `frontend/`, `backend/app/routers/*` (behalve de providerlijst), `models.py`, `status.py`,
-`processing.py`. De pijplijn roept de vier methoden al in de juiste volgorde aan en slaat de resultaten op.
+De pijplijn (`processing.py`) roept de vier methoden in vaste volgorde aan, valideert de uitvoer en slaat hem op.
 
 ## 2. Het contract: vier methoden
 
@@ -123,10 +168,11 @@ Doelstellingen: Nieuw ontwerp opgeleverd; Technische haalbaarheid onderzocht; Bu
 ...
 ```
 
-## 4. Voorbeeld: `AnthropicProvider.extract`
+## 4. `AnthropicProvider` (zoals geïmplementeerd)
 
-Met de officiële Python-SDK (`pip install anthropic`) en structured outputs: `messages.parse` valideert het
-antwoord direct tegen het Pydantic-model `MeetingAnalysis`. Standaardmodel: `claude-opus-5-5`.
+Met de officiële Python-SDK en structured outputs: `beta.messages.parse` valideert het antwoord direct tegen
+het Pydantic-model. Hieronder de kern in vereenvoudigde vorm; de volledige code met foutafhandeling staat in
+[`anthropic_provider.py`](../backend/app/ai/anthropic_provider.py).
 
 ```python
 from anthropic import AsyncAnthropic
@@ -151,7 +197,7 @@ class AnthropicProvider(AIProvider):
         self.client = AsyncAnthropic(api_key=api_key)  # of zonder argument: leest ANTHROPIC_API_KEY
 
     async def extract(self, transcript: Transcript) -> MeetingAnalysis:
-        response = await self.client.messages.parse(
+        response = await self.client.beta.messages.parse(
             model="claude-opus-5-5",
             max_tokens=16000,
             system=EXTRACT_SYSTEM,
@@ -161,6 +207,9 @@ class AnthropicProvider(AIProvider):
                            + _format_transcript(transcript),
             }],
             output_format=MeetingAnalysis,
+            output_config={"effort": "high"},
+            betas=["server-side-fallback-2026-07-01"],
+            fallbacks="default",  # bij een weigering automatisch een ander model
         )
         if response.stop_reason == "refusal":
             raise RuntimeError("De AI heeft deze analyse geweigerd.")
@@ -169,20 +218,18 @@ class AnthropicProvider(AIProvider):
 
 Aandachtspunten:
 
-- **Vergaderdatum en doelen**: geef ze mee in het gebruikersbericht (pas daarvoor de aanroep in `processing.py`
-  niet aan; zet ze bijvoorbeeld in een extra veld van `Transcript` of in de `TranscriptionHints`).
-- **Schema-ondersteuning**: test bij de eerste aanroep of het schema geaccepteerd wordt. Geeft de API een fout
-  op beperkingen zoals `ge`/`le` (bijv. `confidence`), haal die dan uit het model en valideer achteraf.
-- **Refusals**: controleer altijd `stop_reason` voordat je de output leest. Voor productie kun je server-side
-  fallbacks inschakelen (zie de documentatie van Anthropic over *refusals and fallback*).
+- **Vergaderdatum en doelen** zitten in `Transcript.meeting_date` en `Transcript.project_goals`; de pijplijn
+  vult ze in na het transcriberen en ze gaan mee in het gebruikersbericht.
+- **Refusals en afgebroken antwoorden** (`stop_reason` `refusal` / `max_tokens`) worden een Nederlandse foutmelding.
 - **Lange vergaderingen**: een transcript van een uur past ruim in het contextvenster; splitsen is niet nodig.
-- `match` en `prepare_next` volgen hetzelfde patroon met `output_format` als lijst-wrapper, bijvoorbeeld
-  `class Suggestions(BaseModel): items: list[StatusSuggestion]`.
+- `match` en `prepare_next` gebruiken een kleine wrapper (`{"suggestions": [...]}`, `{"questions": [...]}`).
 
-## 5. Whisper: `WhisperProvider.transcribe`
+## 5. Whisper: `WhisperProvider.transcribe` (zoals geïmplementeerd)
 
-Lokaal met [`faster-whisper`](https://github.com/SYSTRAN/faster-whisper); sprekerherkenning (diarisatie) met
-bijvoorbeeld `pyannote.audio`. Schets:
+Lokaal met [`faster-whisper`](https://github.com/SYSTRAN/faster-whisper): audio wordt tijdelijk naar schijf
+geschreven, getranscribeerd (in een aparte thread, met de deelnemersnamen als `initial_prompt`) en direct
+verwijderd. Sprekerherkenning ontbreekt nog; uitbreiden met `pyannote.audio` kan op de plek van stap 3 hieronder.
+Schets van de opbouw:
 
 ```python
 from faster_whisper import WhisperModel
@@ -203,15 +250,14 @@ class WhisperProvider:
         ...
 ```
 
-Draai zware modellen niet in de request-thread: `processing.py` voert de verwerking al als achtergrondtaak uit.
-Voor productie is een echte takenwachtrij (bijv. Celery of RQ) aan te raden.
+De verwerking draait als achtergrondtaak; voor productie is een echte takenwachtrij (bijv. Celery of RQ) aan te raden.
 
 ## 6. Testen
 
-1. Draai de bestaande tests: `npm run test`. De statusmodel-tests blijven gelden, ongeacht de provider.
-2. Voeg een contracttest toe die de nieuwe provider met een kort Nederlands transcript aanroept en controleert
-   dat elke `segment_index` binnen het transcript valt en dat `owner_name` in de deelnemerslijst staat.
-3. Vergelijk de output met de mock op de demovergaderingen (`backend/app/seed_data.py`).
+1. `npm run test` draait alles zonder netwerk: `tests/test_anthropic_provider.py` gebruikt een nagebootste
+   Anthropic-client (aanroepparameters, foutmeldingen, validatie).
+2. Echte test: zet de sleutel in `.env`, start de app en upload een korte opname. In de backendlog staat per
+   aanroep het tokengebruik (`Claude …: input=… output=…`).
 
 ## 7. Privacy en AVG
 

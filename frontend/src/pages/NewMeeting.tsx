@@ -139,13 +139,16 @@ export function NewMeeting() {
             onConsent={setConsent}
             consentRequired={consentRequired}
             retention={settings ? RETENTION_TEXT[settings.audio_retention] : undefined}
+            mockMode={settings?.ai_provider === 'mock' || settings?.transcriber === 'mock'}
             valid={step2Valid}
             submitting={submitting}
             onBack={() => setStep(0)}
             onStart={() => void start()}
           />
         )}
-        {step === 2 && meetingId !== null && <StepProcessing meetingId={meetingId} onDone={goToSpeakers} onRestart={restartUpload} />}
+        {step === 2 && meetingId !== null && (
+          <StepProcessing meetingId={meetingId} onDone={goToSpeakers} onRestart={restartUpload} realAi={settings?.ai_provider !== 'mock'} />
+        )}
         {step === 3 && meetingId !== null && <StepSpeakers meetingId={meetingId} />}
       </div>
     </>
@@ -272,6 +275,8 @@ interface StepUploadProps {
   onConsent: (v: boolean) => void
   consentRequired: boolean
   retention?: string
+  /** Met de mock-transcriptie werkt een nep-voorbeeldbestand; met Whisper is echte audio nodig. */
+  mockMode: boolean
   valid: boolean
   submitting: boolean
   onBack: () => void
@@ -339,7 +344,7 @@ function StepUpload(p: StepUploadProps) {
           <input ref={inputRef} type="file" accept={`audio/*,${ACCEPTED.join(',')}`} className="sr-only" tabIndex={-1} onChange={(e) => accept(e.target.files?.[0])} />
         </div>
       )}
-      {!p.file && (
+      {!p.file && p.mockMode && (
         <p className="text-center text-xs text-muted-foreground">
           Geen opname bij de hand?{' '}
           <button type="button" onClick={useSample} className="font-medium text-primary hover:underline">
@@ -391,7 +396,7 @@ function StepIcon({ state }: { state: ProcessingStep['state'] }) {
 
 const STATE_LABEL: Record<ProcessingStep['state'], string> = { klaar: 'klaar', bezig: 'bezig', fout: 'mislukt', wachten: 'wacht' }
 
-function StepProcessing({ meetingId, onDone, onRestart }: { meetingId: number; onDone: () => void; onRestart: () => void }) {
+function StepProcessing({ meetingId, onDone, onRestart, realAi }: { meetingId: number; onDone: () => void; onRestart: () => void; realAi: boolean }) {
   const qc = useQueryClient()
   const { data } = useQuery({
     queryKey: ['processing', meetingId],
@@ -406,6 +411,16 @@ function StepProcessing({ meetingId, onDone, onRestart }: { meetingId: number; o
     const t = window.setTimeout(onDone, 900)
     return () => window.clearTimeout(t)
   }, [data?.state, onDone, qc])
+
+  // Transcript is al opgeslagen: alleen de analyse opnieuw doen (geen nieuwe upload of transcriptie).
+  const retryAnalysis = async () => {
+    try {
+      await api.reanalyze(meetingId)
+      await qc.invalidateQueries({ queryKey: ['processing', meetingId] })
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Opnieuw starten mislukt')
+    }
+  }
 
   const steps = data?.steps ?? []
   const doneCount = steps.filter((s) => s.state === 'klaar').length
@@ -434,12 +449,23 @@ function StepProcessing({ meetingId, onDone, onRestart }: { meetingId: number; o
       {data?.state === 'failed' && (
         <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
           <span>{data.error ?? 'Er ging iets mis bij het verwerken.'}</span>
-          <Button variant="outline" size="sm" onClick={onRestart}>
-            Opnieuw proberen
-          </Button>
+          <div className="flex gap-2">
+            {data.step >= 3 && (
+              <Button size="sm" onClick={() => void retryAnalysis()}>
+                Opnieuw analyseren
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={onRestart}>
+              Opnieuw uploaden
+            </Button>
+          </div>
         </div>
       )}
-      <p className="text-xs text-muted-foreground">Dit is een simulatie met de MockProvider; met een echte AI duurt dit langer.</p>
+      <p className="text-xs text-muted-foreground">
+        {realAi
+          ? 'Transcriberen gebeurt lokaal en duurt ongeveer even lang als de opname; daarna analyseert Claude de vergadering. Je kunt dit venster open laten.'
+          : 'Dit is een simulatie met de MockProvider; met een echte AI duurt dit langer.'}
+      </p>
     </div>
   )
 }
@@ -491,7 +517,9 @@ function StepSpeakers({ meetingId }: { meetingId: number }) {
         <div>
           <h2 className="text-sm font-semibold">Sprekers koppelen</h2>
           <p className="text-sm text-muted-foreground">
-            De AI herkende {data.speaker_labels.length} stemmen. Koppel elke stem aan een deelnemer, zodat het transcript en de actiepunten de juiste namen tonen.
+            {data.speaker_labels.length === 1
+              ? 'Er is één stem herkend: automatische sprekerherkenning staat nog niet aan. Koppel alleen als er maar één persoon sprak; laat het anders leeg.'
+              : `De AI herkende ${data.speaker_labels.length} stemmen. Koppel elke stem aan een deelnemer, zodat het transcript en de actiepunten de juiste namen tonen.`}
           </p>
         </div>
       </div>

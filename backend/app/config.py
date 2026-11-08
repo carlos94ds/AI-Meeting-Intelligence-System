@@ -25,9 +25,18 @@ class Settings(BaseSettings):
     upload_dir: Path = BACKEND_DIR / "data" / "uploads"
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
-    # Worden pas gebruikt zodra een echte provider is aangesloten. Nooit in code zetten.
-    openai_api_key: str | None = None
+    # --- Echte AI (AI_PROVIDER=anthropic). Sleutels alleen via .env, nooit in code.
     anthropic_api_key: str | None = None
+    anthropic_model: str = "claude-opus-5-5"
+    # low | medium | high | xhigh | max (Claude Opus 5.5 gebruikt standaard 'medium'; extractie vraagt nauwkeurigheid)
+    anthropic_effort: str = "high"
+    openai_api_key: str | None = None
+
+    # --- Transcriptie: whisper (lokaal, faster-whisper) | mock (vaste demotekst, handig om alleen de LLM te testen)
+    transcriber: str = "whisper"
+    whisper_model: str = "small"  # tiny | base | small | medium | large-v3 (groter = nauwkeuriger, trager)
+    whisper_device: str = "auto"  # auto | cpu | cuda
+    whisper_compute_type: str = "int8"
 
     @property
     def cors_origin_list(self) -> list[str]:

@@ -9,6 +9,9 @@ import pytest
 _tmp = Path(tempfile.mkdtemp())
 os.environ["DATABASE_URL"] = f"sqlite:///{(_tmp / 'test.db').as_posix()}"
 os.environ["MOCK_DELAY_SECONDS"] = "0"
+# Tests gebruiken nooit echte AI, ongeacht wat er in .env staat (geen kosten, geen netwerk).
+os.environ["AI_PROVIDER"] = "mock"
+os.environ["ANTHROPIC_API_KEY"] = ""
 
 from fastapi.testclient import TestClient  # noqa: E402
 

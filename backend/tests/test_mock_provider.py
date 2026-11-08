@@ -100,3 +100,33 @@ def test_upload_zonder_toestemming_wordt_geweigerd(client) -> None:  # type: ign
         files={"audio": ("opname.m4a", b"x", "audio/mp4")},
     )
     assert r.status_code == 422
+
+
+def test_opnieuw_analyseren_hergebruikt_transcript_zonder_dubbelingen(client) -> None:  # type: ignore[no-untyped-def]
+    from sqlmodel import Session
+
+    from app.db import engine
+    from app.models import Meeting, ProcessingState
+
+    r = client.post(
+        "/api/meetings",
+        data={"project_id": "1", "title": "Herhaal", "date": "2026-11-06T10:00:00", "participant_ids": "1,2,3,4", "consent": "true"},
+        files={"audio": ("opname.m4a", b"x", "audio/mp4")},
+    )
+    meeting_id = r.json()["id"]
+    before = client.get(f"/api/meetings/{meeting_id}").json()
+    assert before["action_items"]
+
+    # Alleen een mislukte verwerking mag opnieuw
+    assert client.post(f"/api/meetings/{meeting_id}/reanalyze").status_code == 409
+    with Session(engine) as s:
+        m = s.get(Meeting, meeting_id)
+        m.processing_state, m.processing_error = ProcessingState.FAILED, "API niet bereikbaar"  # type: ignore[union-attr]
+        s.add(m)
+        s.commit()
+
+    assert client.post(f"/api/meetings/{meeting_id}/reanalyze").status_code == 202
+    after = client.get(f"/api/meetings/{meeting_id}").json()
+    assert after["processing_state"] == "done" and after["processing_error"] is None
+    assert len(after["segments"]) == len(before["segments"])
+    assert sorted(i["title"] for i in after["action_items"]) == sorted(i["title"] for i in before["action_items"])

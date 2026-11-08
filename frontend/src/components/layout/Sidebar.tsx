@@ -1,5 +1,6 @@
 import { CalendarDays, FolderKanban, LayoutDashboard, ListChecks, Settings, Sparkles } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
+import { useSettings } from '@/hooks/queries'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
@@ -12,6 +13,8 @@ const NAV = [
 ]
 
 export function Sidebar() {
+  const { data: settings } = useSettings()
+  const mode = !settings ? '…' : settings.ai_provider === 'mock' ? 'Mock (demo)' : `Claude · ${settings.transcriber === 'whisper' ? 'Whisper lokaal' : 'demotranscript'}`
   return (
     <aside className="sticky top-0 flex h-dvh w-16 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground lg:w-60">
       <div className="flex h-14 items-center gap-2.5 px-4 lg:px-5">
@@ -54,7 +57,7 @@ export function Sidebar() {
       <div className="hidden border-t p-4 text-[11px] leading-relaxed text-muted-foreground lg:block">
         Volgt taken en projecten, geen personen.
         <br />
-        AI-modus: <span className="font-medium text-foreground">Mock (demo)</span>
+        AI-modus: <span className="font-medium text-foreground">{mode}</span>
       </div>
     </aside>
   )

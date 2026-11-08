@@ -122,6 +122,7 @@ class MeetingSummaryOut(BaseModel):
     duration_minutes: int
     participant_count: int
     processing_state: ProcessingState
+    processing_error: str | None = None
     action_item_count: int
     pending_review_count: int
     pending_suggestion_count: int
@@ -306,6 +307,10 @@ class DashboardOut(BaseModel):
 
 class SettingsOut(BaseModel):
     ai_provider: str
+    ai_model: str
+    transcriber: str
+    whisper_model: str
+    api_key_configured: bool
     available_providers: list[dict[str, str | bool]]
     language: str
     audio_retention: str

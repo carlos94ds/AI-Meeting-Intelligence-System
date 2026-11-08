@@ -93,13 +93,30 @@ export function MeetingDetail() {
           title={data.processing_state === 'failed' ? 'Verwerking mislukt' : 'Deze vergadering wordt nog verwerkt'}
           description={
             data.processing_state === 'failed'
-              ? 'Er ging iets mis bij het verwerken van de opname. Probeer het opnieuw te uploaden.'
+              ? (data.processing_error ?? 'Er ging iets mis bij het verwerken van de opname.') +
+                (data.segments.length > 0 ? ' Het transcript is bewaard; je kunt de analyse opnieuw starten.' : ' Upload de opname opnieuw.')
               : 'Transcript, samenvatting en actiepunten verschijnen hier zodra de verwerking klaar is.'
           }
           action={
-            <Button variant="outline" onClick={() => void refetch()}>
-              Opnieuw controleren
-            </Button>
+            data.processing_state === 'failed' && data.segments.length > 0 ? (
+              <Button
+                onClick={() =>
+                  void api.reanalyze(data.id).then(
+                    () => {
+                      toast.success('Analyse opnieuw gestart')
+                      void refetch()
+                    },
+                    (e: unknown) => toast.error(e instanceof Error ? e.message : 'Opnieuw starten mislukt'),
+                  )
+                }
+              >
+                Opnieuw analyseren
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={() => void refetch()}>
+                Opnieuw controleren
+              </Button>
+            )
           }
         />
       </>

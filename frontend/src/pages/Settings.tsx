@@ -1,4 +1,4 @@
-import { Bot, KeyRound, Languages, Lock, Repeat, ShieldCheck, type LucideIcon } from 'lucide-react'
+import { AlertTriangle, Bot, CheckCircle2, KeyRound, Languages, Lock, Repeat, ShieldCheck, type LucideIcon } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
@@ -83,40 +83,68 @@ function SettingsForm({ settings }: { settings: AppSettings }) {
 
   return (
     <div className="rounded-xl border bg-card px-6">
-      <Section icon={Bot} title="AI-provider" description="Welke dienst transcribeert en analyseert de vergaderingen.">
+      <Section icon={Bot} title="AI-provider" description="Welke dienst transcribeert en analyseert de vergaderingen. Wijzigen via AI_PROVIDER in .env (herstart van de backend nodig).">
         <fieldset>
           <legend className="sr-only">AI-provider</legend>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid gap-2 sm:grid-cols-3">
             {settings.available_providers.map((p) => {
               const active = p.id === settings.ai_provider
               return (
-                <label
+                <div
                   key={p.id}
                   className={cn(
                     'flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-sm',
-                    active ? 'border-primary bg-accent/50' : 'cursor-not-allowed opacity-60',
+                    active ? 'border-primary bg-accent/50' : !p.available && 'opacity-60',
                   )}
                 >
                   <span className="flex items-center gap-2">
-                    <input type="radio" name="provider" checked={active} disabled={!p.available} readOnly className="accent-[var(--primary)]" />
+                    <input type="radio" name="provider" checked={active} disabled={!active} readOnly aria-label={p.label} className="accent-[var(--primary)]" />
                     {p.label}
                   </span>
                   {active ? (
                     <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">Actief</span>
-                  ) : (
+                  ) : !p.available ? (
                     <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">Binnenkort</span>
-                  )}
-                </label>
+                  ) : null}
+                </div>
               )
             })}
           </div>
         </fieldset>
+        {settings.ai_provider !== 'mock' && (
+          <dl className="grid gap-3 rounded-lg border p-3 text-sm sm:grid-cols-3">
+            <div>
+              <dt className="text-xs text-muted-foreground">Taalmodel</dt>
+              <dd className="mt-0.5 font-medium">{settings.ai_model}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-muted-foreground">Transcriptie</dt>
+              <dd className="mt-0.5 font-medium">
+                {settings.transcriber === 'whisper' ? `Lokaal (Whisper ${settings.whisper_model})` : 'Demotranscript (mock)'}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs text-muted-foreground">Sprekerherkenning</dt>
+              <dd className="mt-0.5 font-medium">Handmatig koppelen</dd>
+            </div>
+          </dl>
+        )}
         <div className="grid gap-1.5">
-          <Label htmlFor="api-key" className="inline-flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1.5 text-sm font-medium">
             <KeyRound className="size-3.5" aria-hidden /> API-sleutel
-          </Label>
-          <Input id="api-key" type="password" disabled placeholder="Niet nodig voor de mock-provider" className="max-w-sm" />
-          <p className="text-xs text-muted-foreground">Sleutels worden later via <code className="rounded bg-muted px-1">.env</code> op de server ingesteld, nooit in de browser.</p>
+          </span>
+          {settings.ai_provider === 'mock' ? (
+            <p className="text-sm text-muted-foreground">Niet nodig voor de mock-provider.</p>
+          ) : settings.api_key_configured ? (
+            <p className="inline-flex items-center gap-1.5 text-sm text-status-afgerond">
+              <CheckCircle2 className="size-4" aria-hidden /> Ingesteld via .env
+            </p>
+          ) : (
+            <p role="alert" className="inline-flex items-center gap-1.5 text-sm text-destructive">
+              <AlertTriangle className="size-4" aria-hidden /> Niet ingesteld: zet ANTHROPIC_API_KEY in .env en herstart de backend.
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground">Sleutels staan alleen op de server, nooit in de browser of in de code.</p>
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="language" className="inline-flex items-center gap-1.5">
@@ -130,7 +158,7 @@ function SettingsForm({ settings }: { settings: AppSettings }) {
         <div className="grid gap-1.5">
           <Label htmlFor="audio-retention">Bewaartermijn audio</Label>
           <SimpleSelect id="audio-retention" items={AUDIO_RETENTION} value={settings.audio_retention} onChange={(v) => save.mutate({ audio_retention: v as AppSettings['audio_retention'] })} />
-          <p className="text-xs text-muted-foreground">In dit prototype wordt audio nooit op schijf bewaard.</p>
+          <p className="text-xs text-muted-foreground">Audio wordt alleen tijdens het transcriberen tijdelijk opgeslagen en daarna direct verwijderd; andere termijnen zijn nog niet actief.</p>
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="transcript-retention">Bewaartermijn transcript</Label>
